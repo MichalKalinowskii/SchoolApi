@@ -183,6 +183,6 @@ namespace SchoolAPI.Controllers
             }
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return Ok(subjectsDto);
-        }
+        }   
     }
 }
