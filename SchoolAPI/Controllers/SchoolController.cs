@@ -183,6 +183,15 @@ namespace SchoolAPI.Controllers
             }
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return Ok(subjectsDto);
-        }   
+        }
+        [HttpPost]
+        public ActionResult CreateClass([FromBody] CreateClassDto group)
+        {
+            var classes = _mapper.Map<Class>(group);
+            _dbcontext.Classes.Add(classes);
+            _dbcontext.SaveChanges();
+            return Created($"/api/school/classes/created/{classes.ClassId}",null);
+        }
+
     }
 }

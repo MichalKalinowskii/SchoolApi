@@ -14,6 +14,7 @@ namespace SchoolAPI.MappingProfile
         {
             
             
+            //For HttpGet
             CreateMap<Class, ClassDto>()
                 .ForMember(dtc => dtc.Students, map => map.MapFrom(src => src.Student));
 
@@ -31,7 +32,12 @@ namespace SchoolAPI.MappingProfile
 
             CreateMap<Student, StudentDto>();
 
-            
+            //For HttpPost
+            CreateMap<CreateClassDto, Class>()
+                .ForMember(dtc => dtc.Teacher, map => map.MapFrom(src => new Teacher()
+                {TeacherName=src.TeacherName, TeacherSecondName=src.TeacherSecondName,TeacherTitle=src.TeacherTitle}));
+
+
         }
     }
 }

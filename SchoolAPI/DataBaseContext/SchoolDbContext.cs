@@ -10,7 +10,7 @@ namespace SchoolAPI.DataBaseContext
 {
     public class SchoolDbContext: DbContext
     {
-        private string _connectionString=
+        private readonly string _connectionString=
             @"Server=SQLOLEDB.1;Integrated Security = SSPI; Persist Security Info=False;Initial Catalog = SchoolDb; Data Source = localhost;";
 
         public DbSet<Class> Classes { get; set; }
