@@ -23,13 +23,15 @@ namespace SchoolAPI.Controllers
             _mapper = mapper;
         }
 
-        //ten nie pokazuje prowadzonych przedmiotów przez nauczyciela
+        //this one doesnt show subjects run by teacher
         [HttpGet("classes")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses()
         {
             var classes = _dbcontext.Classes
                 .Include(r=>r.Student)
                 .Include(r=>r.Teacher)
+                .ThenInclude(r=>r.SubjectsTaughtByTeacher)
+                .ThenInclude(r=>r.Subject)
                 .ToList();
             
             if (classes is null)
@@ -40,7 +42,7 @@ namespace SchoolAPI.Controllers
             return Ok(classesDto);
         }
 
-        //ten nie pokazuje prowadzonych przedmiotów przez nauczyciela
+        //this one doesnt show subjects run by teacher
         [HttpGet("classes/{classId}")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses([FromRoute] int classId)
         {
@@ -94,11 +96,14 @@ namespace SchoolAPI.Controllers
             return Ok(studentsDto);
         }
 
-        //ten nie pokazuje prowadzonych przedmiotów przez nauczyciela
+        //this one doesnt show subjects run by teacher
         [HttpGet("teachers")]
         public ActionResult<IEnumerable<StudentDto>> GetAllTeachers()
         {
-            var teachers = _dbcontext.Teachers.ToList();
+            var teachers = _dbcontext.Teachers
+                .Include(r => r.SubjectsTaughtByTeacher)
+                .ThenInclude(x=>x.Subject)
+                .ToList();
             if (teachers.Count == 0)
             {
                 return NotFound();
@@ -107,7 +112,7 @@ namespace SchoolAPI.Controllers
             return Ok(teachersDto);
         }
 
-        //ten nie pokazuje prowadzonych przedmiotów przez nauczyciela
+        //this one doesnt show subjects run by teacher
         [HttpGet("teacher/{teacherId}")]
         public ActionResult<IEnumerable<StudentDto>> GetTeacherByTeacherId([FromRoute] int teacherId)
         {
@@ -119,8 +124,8 @@ namespace SchoolAPI.Controllers
             var teachersDto = _mapper.Map<List<TeacherDto>>(teachers);
             return Ok(teachersDto);
         }
-        
-        //ten nie pokazuje prowadzonych przedmiotów przez nauczyciela
+
+        //this one doesnt show subjects run by teacher
         [HttpGet("teachers/{subject}")]
         public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
         {
@@ -184,13 +189,21 @@ namespace SchoolAPI.Controllers
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return Ok(subjectsDto);
         }
-        [HttpPost]
-        public ActionResult CreateClass([FromBody] CreateClassDto group)
+
+        //uri doesnt work
+        [HttpPost("class/teacher")]
+        public ActionResult CreateClassAndTeacher([FromBody] CreateClassAndTeacherDto group)
         {
             var classes = _mapper.Map<Class>(group);
             _dbcontext.Classes.Add(classes);
             _dbcontext.SaveChanges();
             return Created($"/api/school/classes/created/{classes.ClassId}",null);
+        }
+
+        [HttpPost("teacher")]
+        public ActionResult AddTeacher([FromBody] AddTeacherDto teacher)
+        {
+            return null;
         }
 
     }

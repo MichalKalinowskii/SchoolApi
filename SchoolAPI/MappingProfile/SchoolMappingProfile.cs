@@ -11,19 +11,19 @@ namespace SchoolAPI.MappingProfile
     public class SchoolMappingProfile : Profile
     {
         public SchoolMappingProfile()
-        {
-            
-            
+        {                        
             //For HttpGet
             CreateMap<Class, ClassDto>()
                 .ForMember(dtc => dtc.Students, map => map.MapFrom(src => src.Student));
 
-            CreateMap<SubjectsTaughtByTeacher, SubjectsTaughtByTeacherDto>();
+            CreateMap<SubjectsTaughtByTeacher, SubjectsTaughtByTeacherDto>()
+                .ForMember(dtc => dtc.Teacher, map => map.MapFrom(src => src.Teacher))
+                .ForMember(dtc => dtc.Subject , map => map.MapFrom(src => src.Subject));
 
-            CreateMap<Teacher, SubjectsTaughtByTeacherDto>()
-                .ForMember(dtc=>dtc.TeacherId,map=>map.MapFrom(src=>src.TeacherId));
+            CreateMap<SubjectsTaughtByTeacher, TeacherDto> ()
+                .ForMember(dtc => dtc.TeacherId, map => map.MapFrom(src => src.TeacherId));               
 
-            CreateMap<Subject, SubjectsTaughtByTeacherDto>()
+            CreateMap<SubjectsTaughtByTeacher, SubjectDto>()
                 .ForMember(dtc => dtc.SubjectId, map => map.MapFrom(src => src.SubjectId)); 
 
             CreateMap<Teacher, TeacherDto>();
@@ -33,7 +33,7 @@ namespace SchoolAPI.MappingProfile
             CreateMap<Student, StudentDto>();
 
             //For HttpPost
-            CreateMap<CreateClassDto, Class>()
+            CreateMap<CreateClassAndTeacherDto, Class>()
                 .ForMember(dtc => dtc.Teacher, map => map.MapFrom(src => new Teacher()
                 {TeacherName=src.TeacherName, TeacherSecondName=src.TeacherSecondName,TeacherTitle=src.TeacherTitle}));
 

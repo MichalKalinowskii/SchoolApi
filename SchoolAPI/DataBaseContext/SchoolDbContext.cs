@@ -22,7 +22,7 @@ namespace SchoolAPI.DataBaseContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Class>().Property(r => r.ClassNumber).IsRequired();
-            modelBuilder.Entity<Class>().Property(r => r.ClassName).IsRequired().HasMaxLength(30);
+            modelBuilder.Entity<Class>().Property(r => r.ClassName).IsRequired().HasMaxLength(3);
 
             modelBuilder.Entity<Student>().Property(r => r.StudentName).IsRequired();
             modelBuilder.Entity<Student>().Property(r => r.StudentSecondName).IsRequired();
