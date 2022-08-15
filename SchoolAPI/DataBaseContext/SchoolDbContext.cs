@@ -17,7 +17,6 @@ namespace SchoolAPI.DataBaseContext
         public DbSet<Student> Students { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-        public DbSet<SubjectsTaughtByTeacher> SubjectsTaughtByTeacher { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,9 +30,6 @@ namespace SchoolAPI.DataBaseContext
             modelBuilder.Entity<Teacher>().Property(r => r.TeacherSecondName).IsRequired();
             
             modelBuilder.Entity<Subject>().Property(r => r.NameOfTheSubject).IsRequired();
-
-            modelBuilder.Entity<SubjectsTaughtByTeacher>().Property(r => r.TeacherId).IsRequired();
-            modelBuilder.Entity<SubjectsTaughtByTeacher>().Property(r => r.SubjectId).IsRequired();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

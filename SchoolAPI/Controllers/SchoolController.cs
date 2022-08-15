@@ -22,15 +22,13 @@ namespace SchoolAPI.Controllers
             _dbcontext = dbcontext;
             _mapper = mapper;
         }
-
-        //this one doesnt show subjects run by teacher
+     
         [HttpGet("classes")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses()
         {
             var classes = _dbcontext.Classes
                 .Include(r=>r.Student)
                 .Include(r=>r.Teacher)
-                .ThenInclude(r=>r.SubjectsTaughtByTeacher)
                 .ThenInclude(r=>r.Subject)
                 .ToList();
             
@@ -42,13 +40,13 @@ namespace SchoolAPI.Controllers
             return Ok(classesDto);
         }
 
-        //this one doesnt show subjects run by teacher
         [HttpGet("classes/{classId}")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses([FromRoute] int classId)
         {
             var classes = _dbcontext.Classes
                 .Include(r => r.Student)
                 .Include(r => r.Teacher)
+                .ThenInclude(r => r.Subject)
                 .Where(r => r.ClassId == classId)
                 .ToList();
 
@@ -96,13 +94,11 @@ namespace SchoolAPI.Controllers
             return Ok(studentsDto);
         }
 
-        //this one doesnt show subjects run by teacher
         [HttpGet("teachers")]
         public ActionResult<IEnumerable<StudentDto>> GetAllTeachers()
         {
             var teachers = _dbcontext.Teachers
-                .Include(subjects => subjects.SubjectsTaughtByTeacher)
-                .ThenInclude(subject=>subject.Subject)
+                .Include(subject=>subject.Subject)
                 .ToList();
             if (teachers.Count == 0)
             {
@@ -112,11 +108,13 @@ namespace SchoolAPI.Controllers
             return Ok(teachersDto);
         }
 
-        //this one doesnt show subjects run by teacher
         [HttpGet("teacher/{teacherId}")]
         public ActionResult<IEnumerable<StudentDto>> GetTeacherByTeacherId([FromRoute] int teacherId)
         {
-            var teachers = _dbcontext.Teachers.Where(r => r.TeacherId == teacherId).ToList();
+            var teachers = _dbcontext.Teachers
+                .Where(r => r.TeacherId == teacherId)
+                .Include(subject=>subject.Subject)
+                .ToList();
             if (teachers.Count == 0)
             {
                 return NotFound();
@@ -125,72 +123,74 @@ namespace SchoolAPI.Controllers
             return Ok(teachersDto);
         }
 
-        //this one doesnt show subjects run by teacher
-        [HttpGet("teachers/{subject}")]
-        public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
-        {
-            var subjectId = _dbcontext.Subjects
-                .Where(w => w.NameOfTheSubject.Equals(subject))
-                .Select(s => s.SubjectId)
-                .FirstOrDefault();  
-            if (subjectId == 0)
-            {
-                return NotFound();
-            }
+        //[HttpGet("teachers/{subject}")]
+        //public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
+        //{
+        //    var subjectId = _dbcontext.Subjects
+        //        .Where(w => w.NameOfTheSubject.Equals(subject))
+        //        .Select(s => s.SubjectId)
+        //        .FirstOrDefault();  
+        //    if (subjectId == 0)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var subjectsTaughtByTeacher =
-                _dbcontext.Teachers
-                .Join(_dbcontext.SubjectsTaughtByTeacher,
-                post=>post.TeacherId,
-                meta=>meta.TeacherId,
-                (post, meta) => new { Post = post, Meta = meta,})
-                .Where(r=>r.Meta.SubjectId == subjectId);
+        //    var subjectsTaughtByTeacher =
+        //        _dbcontext.Teachers
+        //        .Join(_dbcontext.SubjectsTaughtByTeacher,
+        //        post=>post.TeacherId,
+        //        meta=>meta.TeacherId,
+        //        (post, meta) => new { Post = post, Meta = meta,})
+        //        .Where(r=>r.Meta.SubjectId == subjectId);
 
-            List<Teacher> listOfTeachers = new();
-            foreach(var item in subjectsTaughtByTeacher)
-            {
-                listOfTeachers.Add(item.Post);
-            }
-            if (listOfTeachers.Count == 0)
-            {
-                return NotFound();
-            }
+        //    List<Teacher> listOfTeachers = new();
+        //    foreach(var item in subjectsTaughtByTeacher)
+        //    {
+        //        listOfTeachers.Add(item.Post);
+        //    }
+        //    if (listOfTeachers.Count == 0)
+        //    {
+        //        return NotFound();
+        //    }
 
-            List<Subject> listOfSubjects = new();
-            foreach(var item in listOfTeachers)
-            {
-                var subjects = 
-                _dbcontext.Subjects
-                .Join(_dbcontext.SubjectsTaughtByTeacher,
-                post => post.SubjectId,
-                meta => meta.SubjectId,
-                (post, meta) => new { Post = post, Meta = meta, })
-                .Where(r => r.Meta.TeacherId == item.TeacherId);
+        //    List<Subject> listOfSubjects = new();
+        //    foreach(var item in listOfTeachers)
+        //    {
+        //        var subjects = 
+        //        _dbcontext.Subjects
+        //        .Join(_dbcontext.SubjectsTaughtByTeacher,
+        //        post => post.SubjectId,
+        //        meta => meta.SubjectId,
+        //        (post, meta) => new { Post = post, Meta = meta, })
+        //        .Where(r => r.Meta.TeacherId == item.TeacherId);
 
-                foreach (var sub in subjects)
-                {
-                    listOfSubjects.Add(sub.Post); 
-                }
-            }
+        //        foreach (var sub in subjects)
+        //        {
+        //            listOfSubjects.Add(sub.Post); 
+        //        }
+        //    }
 
-            var subjectsDto = _mapper.Map<List<SubjectDto>>(listOfSubjects);
-            var teachersDto = _mapper.Map<List<TeacherDto>>(listOfTeachers);
-            return Ok(teachersDto);
-        }
+        //    var subjectsDto = _mapper.Map<List<SubjectDto>>(listOfSubjects);
+        //    var teachersDto = _mapper.Map<List<TeacherDto>>(listOfTeachers);
+        //    return Ok(teachersDto);
+        //}
 
         [HttpGet("subjects")]
         public ActionResult<IEnumerable<SubjectDto>> GetAllSubjects()
         {
-            var subjects = _dbcontext.Subjects.ToList();
+            var subjects = _dbcontext.Subjects
+                .Select(s=>s.NameOfTheSubject)
+                .Distinct()
+                .ToList();
             if (subjects.Count == 0)
             {
                 return NotFound();
             }
+            
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return Ok(subjectsDto);
         }
 
-        //uri doesnt work
         [HttpPost("class/teacher")]
         public ActionResult CreateClassAndTeacher([FromBody] CreateClassAndTeacherDto group)
         {
