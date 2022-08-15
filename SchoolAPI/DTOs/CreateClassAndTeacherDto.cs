@@ -9,7 +9,7 @@ namespace SchoolAPI.DTOs
     public class CreateClassAndTeacherDto
     {
         [Required]
-        [Range(1,8, ErrorMessage ="Please enter a value form scope in 1 to 8")]
+        [Range(1, 8, ErrorMessage = "Please enter a value form scope in 1 to 8")]
         public int ClassNumber { get; set; }
         [Required]
         [MaxLength(3)]

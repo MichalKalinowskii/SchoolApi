@@ -7,7 +7,6 @@ namespace SchoolAPI.DTOs
 {
     public class SubjectDto
     {
-        public int SubjectId { get; set; }
         public string NameOfTheSubject { get; set; }
     }
 }

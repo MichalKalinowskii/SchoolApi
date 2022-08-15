@@ -11,8 +11,7 @@ namespace SchoolAPI.DTOs
         public string TeacherName { get; set; }
         public string TeacherSecondName { get; set; }
         public string TeacherTitle { get; set; }
-        public List<SubjectsTaughtByTeacherDto> Subjects { get; set; }
-        //public SubjectDto Subject { get; set; }
+        public List<SubjectDto> Subjects { get; set; }
 
     }
 }

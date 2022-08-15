@@ -10,8 +10,9 @@ namespace SchoolAPI.Entities
     {
         [Key]
         public int SubjectId { get; set; }
-        public string NameOfTheSubject { get; set; }        
-        public virtual List<SubjectsTaughtByTeacher> SubjectsTaughtByTeacher { get; set; }
+        public int TeacherId { get; set; }
+        public string NameOfTheSubject { get; set; }
+        public virtual Teacher Teacher { get; set; }
 
     }
 }

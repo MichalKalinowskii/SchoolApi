@@ -101,8 +101,8 @@ namespace SchoolAPI.Controllers
         public ActionResult<IEnumerable<StudentDto>> GetAllTeachers()
         {
             var teachers = _dbcontext.Teachers
-                .Include(r => r.SubjectsTaughtByTeacher)
-                .ThenInclude(x=>x.Subject)
+                .Include(subjects => subjects.SubjectsTaughtByTeacher)
+                .ThenInclude(subject=>subject.Subject)
                 .ToList();
             if (teachers.Count == 0)
             {

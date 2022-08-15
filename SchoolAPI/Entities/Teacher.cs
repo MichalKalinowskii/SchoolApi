@@ -11,7 +11,7 @@ namespace SchoolAPI.Entities
         public string TeacherSecondName { get; set; }
         public string TeacherTitle { get; set; }
         public virtual Class Class { get; set; }
-        public virtual List<SubjectsTaughtByTeacher> SubjectsTaughtByTeacher { get; set; }
+        public virtual List<Subject> Subject { get; set; }
 
     }
 }
