@@ -47,7 +47,7 @@ namespace SchoolAPI.DataSeed
                             StudentName="Adam",
                             StudentSecondName="Nowak",
                             StudentAge=13
-                        },                       
+                        },
                         new Student()
                         {
                             StudentName="Ala",
@@ -68,23 +68,16 @@ namespace SchoolAPI.DataSeed
                         TeacherSecondName="Zabola",
                         TeacherTitle="Magister",
 
-                        SubjectsTaughtByTeacher = new List<SubjectsTaughtByTeacher>()
+                        Subject = new List<Subject>()
                         {
-                            new SubjectsTaughtByTeacher()
+                            new Subject()
                             {
-                                Subject = new Subject()
-                                {
-                                    NameOfTheSubject="Informatyka"
-                                },
+                                NameOfTheSubject="Informatyka"
                             },
-                            new SubjectsTaughtByTeacher()
+                            new Subject()
                             {
-                                Subject = new Subject()
-                                {
-                                    NameOfTheSubject="Technika"
-                                },
+                                NameOfTheSubject="Technika"
                             }
-
                         }
                     }
                 },
@@ -114,7 +107,7 @@ namespace SchoolAPI.DataSeed
                             StudentSecondName="Pufalo",
                             StudentAge=14
                         },
-                        
+
                     },
 
                     Teacher = new Teacher()
@@ -123,21 +116,15 @@ namespace SchoolAPI.DataSeed
                         TeacherSecondName="Owadzka",
                         TeacherTitle="Profesor",
 
-                        SubjectsTaughtByTeacher = new List<SubjectsTaughtByTeacher>()
+                        Subject = new List<Subject>()
                         {
-                            new SubjectsTaughtByTeacher()
+                            new Subject()
                             {
-                                Subject = new Subject()
-                                {
-                                    NameOfTheSubject="Matematyka"
-                                },
+                                NameOfTheSubject="Matematyka"
                             },
-                            new SubjectsTaughtByTeacher()
+                            new Subject()
                             {
-                                Subject = new Subject()
-                                {
-                                    NameOfTheSubject="Fizyka"
-                                },
+                                NameOfTheSubject="Fizyka"
                             }
                         }
                     }
