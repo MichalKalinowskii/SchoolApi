@@ -22,7 +22,10 @@ namespace SchoolAPI.Controllers
             _dbcontext = dbcontext;
             _mapper = mapper;
         }
-     
+
+
+        //GET
+
         [HttpGet("classes")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses()
         {
@@ -41,7 +44,7 @@ namespace SchoolAPI.Controllers
         }
 
         [HttpGet("classes/{classId}")]
-        public ActionResult<IEnumerable<ClassDto>> GetAllClasses([FromRoute] int classId)
+        public ActionResult<IEnumerable<ClassDto>> GetAllClassesById([FromRoute] int classId)
         {
             var classes = _dbcontext.Classes
                 .Include(r => r.Student)
@@ -166,21 +169,61 @@ namespace SchoolAPI.Controllers
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return Ok(subjectsDto);
         }
+        
+        
+        //POST
 
         [HttpPost("class/teacher")]
-        public ActionResult CreateClassAndTeacher([FromBody] CreateClassAndTeacherDto group)
+        public ActionResult CreateClassAndTeacherToIt([FromBody] CreateClassAndTeacherDto group)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var classes = _mapper.Map<Class>(group);
             _dbcontext.Classes.Add(classes);
             _dbcontext.SaveChanges();
-            return Created($"/api/school/classes/created/{classes.ClassId}",null);
+            return Created($"/api/school/classes/{classes.ClassId}",null);
         }
 
-        [HttpPost("teacher")]
-        public ActionResult AddTeacher([FromBody] AddTeacherDto teacher)
+        [HttpPost("teacher/subjects")]
+        public ActionResult CreateTeacherAndSubjectsToHim([FromBody] CreateTeacherAndSubjectDto teacher)
         {
-            return null;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var teacheres = _mapper.Map<Teacher>(teacher);
+            _dbcontext.Teachers.Add(teacheres);
+            _dbcontext.SaveChanges();
+            return Created($"/api/school/teacher/{teacheres.TeacherId}", null);
         }
+
+        [HttpPost("student/class")]
+        public ActionResult CreateStudentAndAssignClassToHim([FromBody] CreateStudentAndAssignClassDto student)
+        {
+            var classesId = _dbcontext.Classes
+                .Select(s => s.ClassId)
+                .ToList();
+
+            if (!ModelState.IsValid )
+            {
+                return BadRequest(ModelState);
+            }
+            
+            if (!classesId.Contains(student.ClassId))
+            {
+                return BadRequest("Given ClassId doesn't exist");
+            }
+
+            var students = _mapper.Map<Student>(student);
+            _dbcontext.Students.Add(students);
+            _dbcontext.SaveChanges();
+            return Created($"/api/school/student/{students.StudentId}", null);
+        }
+
 
     }
 }

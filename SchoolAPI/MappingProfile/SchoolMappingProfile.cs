@@ -26,8 +26,17 @@ namespace SchoolAPI.MappingProfile
             //For HttpPost
             CreateMap<CreateClassAndTeacherDto, Class>()
                 .ForMember(dst => dst.Teacher, map => map.MapFrom(src => new Teacher()
-                {TeacherName=src.TeacherName, TeacherSecondName=src.TeacherSecondName,TeacherTitle=src.TeacherTitle}));
+                {
+                    TeacherName=src.TeacherName, 
+                    TeacherSecondName=src.TeacherSecondName,
+                    TeacherTitle=src.TeacherTitle, 
+                    Subject=src.Subjects
+                }));
 
+            CreateMap<CreateTeacherAndSubjectDto, Teacher>()
+                .ForMember(dst => dst.Subject, map => map.MapFrom(src => src.Subjects));
+
+            CreateMap<CreateStudentAndAssignClassDto, Student>();
         }
     }
 }

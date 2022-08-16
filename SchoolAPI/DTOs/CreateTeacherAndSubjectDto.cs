@@ -7,14 +7,8 @@ using System.Threading.Tasks;
 
 namespace SchoolAPI.DTOs
 {
-    public class CreateClassAndTeacherDto
+    public class CreateTeacherAndSubjectDto
     {
-        [Required]
-        [Range(1, 8)]
-        public int ClassNumber { get; set; }
-        [Required]
-        [MaxLength(3)]
-        public string ClassName { get; set; }
         [Required]
         public string TeacherName { get; set; }
         [Required]
