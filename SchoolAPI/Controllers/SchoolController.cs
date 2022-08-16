@@ -123,66 +123,42 @@ namespace SchoolAPI.Controllers
             return Ok(teachersDto);
         }
 
-        //[HttpGet("teachers/{subject}")]
-        //public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
-        //{
-        //    var subjectId = _dbcontext.Subjects
-        //        .Where(w => w.NameOfTheSubject.Equals(subject))
-        //        .Select(s => s.SubjectId)
-        //        .FirstOrDefault();  
-        //    if (subjectId == 0)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpGet("teachers/{subject}")]
+        public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
+        {
+            var teacherBySubject = _dbcontext.Teachers
+                .Include(s => s.Subject)
+                .Join(_dbcontext.Subjects,
+                    post=>post.TeacherId,
+                    meta=>meta.TeacherId,
+                    (post, meta) => new { Post = post, Meta = meta,})
+                .Where(r=>r.Meta.NameOfTheSubject.Equals(subject))
+                .ToList();
 
-        //    var subjectsTaughtByTeacher =
-        //        _dbcontext.Teachers
-        //        .Join(_dbcontext.SubjectsTaughtByTeacher,
-        //        post=>post.TeacherId,
-        //        meta=>meta.TeacherId,
-        //        (post, meta) => new { Post = post, Meta = meta,})
-        //        .Where(r=>r.Meta.SubjectId == subjectId);
+            if (teacherBySubject.Count == 0)
+            {
+                return NotFound();
+            }
 
-        //    List<Teacher> listOfTeachers = new();
-        //    foreach(var item in subjectsTaughtByTeacher)
-        //    {
-        //        listOfTeachers.Add(item.Post);
-        //    }
-        //    if (listOfTeachers.Count == 0)
-        //    {
-        //        return NotFound();
-        //    }
+            List<Teacher> teachers = new();
+            foreach (var item in teacherBySubject)
+            {
+                teachers.Add(item.Post);
+            }
 
-        //    List<Subject> listOfSubjects = new();
-        //    foreach(var item in listOfTeachers)
-        //    {
-        //        var subjects = 
-        //        _dbcontext.Subjects
-        //        .Join(_dbcontext.SubjectsTaughtByTeacher,
-        //        post => post.SubjectId,
-        //        meta => meta.SubjectId,
-        //        (post, meta) => new { Post = post, Meta = meta, })
-        //        .Where(r => r.Meta.TeacherId == item.TeacherId);
-
-        //        foreach (var sub in subjects)
-        //        {
-        //            listOfSubjects.Add(sub.Post); 
-        //        }
-        //    }
-
-        //    var subjectsDto = _mapper.Map<List<SubjectDto>>(listOfSubjects);
-        //    var teachersDto = _mapper.Map<List<TeacherDto>>(listOfTeachers);
-        //    return Ok(teachersDto);
-        //}
+            var teacherDto = _mapper.Map<List<TeacherDto>>(teachers);
+            return Ok(teacherDto);
+        }
 
         [HttpGet("subjects")]
         public ActionResult<IEnumerable<SubjectDto>> GetAllSubjects()
         {
             var subjects = _dbcontext.Subjects
-                .Select(s=>s.NameOfTheSubject)
-                .Distinct()
-                .ToList();
-            if (subjects.Count == 0)
+                .ToList()
+                .GroupBy(g=>g.NameOfTheSubject)
+                .Select(s=>s.First());
+
+            if (!subjects.Any())
             {
                 return NotFound();
             }
