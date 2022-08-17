@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using SchoolAPI.DataBaseContext;
 using SchoolAPI.DataSeed;
 using SchoolAPI.Interfaces;
+using SchoolAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,7 @@ namespace SchoolAPI
             services.AddDbContext<SchoolDbContext>();
             services.AddScoped<ISchoolSeeder,SchoolSeeder>();
             services.AddAutoMapper(this.GetType().Assembly);
+            services.AddScoped<ISchoolService,SchoolService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
