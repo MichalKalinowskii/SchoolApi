@@ -25,6 +25,7 @@ namespace SchoolAPI.Services
 
         //GET
 
+
         public IEnumerable<ClassDto> GetAllClasses()
         {
             var classes = _dbcontext.Classes
@@ -39,22 +40,14 @@ namespace SchoolAPI.Services
 
         public ClassDto GetClassById(int classId)
         {
-            try
-            {
-                var classes = _dbcontext.Classes
-                .Include(r => r.Student)
-                .Include(r => r.Teacher)
-                .ThenInclude(r => r.Subject)
-                .Where(r => r.ClassId == classId)
-                .First();
-                var classesDto = _mapper.Map<ClassDto>(classes);
-                return classesDto;
-            }
-            catch
-            {
-                return null;
-            }                     
-            
+            var classes = _dbcontext.Classes
+            .Include(r => r.Student)
+            .Include(r => r.Teacher)
+            .ThenInclude(r => r.Subject)
+            .Where(r => r.ClassId == classId)
+            .FirstOrDefault();
+            var classesDto = _mapper.Map<ClassDto>(classes);
+            return classesDto;
         }
 
         public IEnumerable<StudentDto> GetAllStudents()
@@ -66,17 +59,9 @@ namespace SchoolAPI.Services
 
         public StudentDto GetStudentById(int studentId)
         {
-            try
-            {
-                var student = _dbcontext.Students.Where(r => r.StudentId == studentId).First();
-                var studentDto = _mapper.Map<StudentDto>(student);
-                return studentDto;
-            }
-            catch
-            {
-                return null;
-            }
-            
+            var student = _dbcontext.Students.Where(r => r.StudentId == studentId).FirstOrDefault();
+            var studentDto = _mapper.Map<StudentDto>(student);
+            return studentDto;
         }
 
         public IEnumerable<StudentDto> GetStudentsByAge(int age)
@@ -91,28 +76,22 @@ namespace SchoolAPI.Services
             var teachers = _dbcontext.Teachers
                 .Include(subject => subject.Subject)
                 .ToList();
-            
+
             var teachersDto = _mapper.Map<List<TeacherDto>>(teachers);
             return teachersDto;
         }
 
         public TeacherDto GetTeacherById(int teacherId)
         {
-            try
-            {
-                var teacher = _dbcontext.Teachers
-                .Where(r => r.TeacherId == teacherId)
-                .Include(subject => subject.Subject)
-                .First();
 
-                var teacherDto = _mapper.Map<TeacherDto>(teacher);
-                return teacherDto;
-            }
-            catch
-            {
-                return null;
-            }
-            
+            var teacher = _dbcontext.Teachers
+            .Where(r => r.TeacherId == teacherId)
+            .Include(subject => subject.Subject)
+            .FirstOrDefault();
+
+            var teacherDto = _mapper.Map<TeacherDto>(teacher);
+            return teacherDto;
+
         }
 
         public IEnumerable<TeacherDto> GetTeachersBySubject(string subject)
@@ -146,6 +125,13 @@ namespace SchoolAPI.Services
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return subjectsDto;
         }
+        public IEnumerable<int> GetAllClassesId()
+        {
+            var classesId = _dbcontext.Classes
+                .Select(s => s.ClassId)
+                .ToList();
+            return classesId;
+        }
 
 
         // POST
@@ -174,14 +160,58 @@ namespace SchoolAPI.Services
             return students.StudentId;
         }
 
-        public IEnumerable<int> GetAllClassesId()
+        
+
+        // DELETE
+
+        public bool RemoveStudent(int studentId)
         {
-            var classesId = _dbcontext.Classes
-                .Select(s => s.ClassId)
-                .ToList();
-            return classesId;
+            var student = _dbcontext.Students.Where(r => r.StudentId == studentId).FirstOrDefault();
+            if (student is null) return false;
+            _dbcontext.Students.Remove(student);
+            _dbcontext.SaveChanges();
+            return true;
         }
 
+        public bool RemoveTeacherThatIsNotATutor(int teacherId)
+        {
+            var teacher = _dbcontext.Teachers
+                .Where(r => r.TeacherId == teacherId)
+                .FirstOrDefault();
+
+            var teachersInClasses = _dbcontext.Classes
+                .Select(s => s.TeacherId)
+                .ToList();
+
+            if (teacher is null || teachersInClasses.Contains(teacherId)) return false;
+
+            _dbcontext.Teachers.Remove(teacher);
+
+            var subject = _dbcontext.Subjects
+                .Where(r => r.TeacherId == teacherId)
+                .ToList();            
+            _dbcontext.Subjects.RemoveRange(subject);
+
+            _dbcontext.SaveChanges();
+            return true;
+        }
+
+
+        //PUT
+
+        public bool UpdateTeacher(UpdateTeacherDto dto,int teacherId)
+        {
+            var teacher = _dbcontext.Teachers
+                .Where(r => r.TeacherId == teacherId)
+                .FirstOrDefault();
+            if (teacher is null) return false;
+
+            teacher.TeacherName = dto.TeacherName;
+            teacher.TeacherSecondName = dto.TeacherSecondName;
+            teacher.TeacherTitle = dto.TeacherTitle;
+            _dbcontext.SaveChanges();
+            return true;
+        }
 
     }
 }

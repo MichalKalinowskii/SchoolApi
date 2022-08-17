@@ -29,7 +29,7 @@ namespace SchoolAPI.Controllers
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses()
         {
             var classes = _schoolService.GetAllClasses();
-            
+
             if (!classes.Any())
             {
                 return NotFound();
@@ -58,7 +58,7 @@ namespace SchoolAPI.Controllers
             if (!students.Any())
             {
                 return NotFound();
-            } 
+            }
             return Ok(students);
         }
 
@@ -77,7 +77,7 @@ namespace SchoolAPI.Controllers
         public ActionResult<IEnumerable<StudentDto>> GetStudentsByAge([FromRoute] int age)
         {
             var students = _schoolService.GetStudentsByAge(age);
-            if(!students.Any())
+            if (!students.Any())
             {
                 return NotFound();
             }
@@ -129,8 +129,8 @@ namespace SchoolAPI.Controllers
 
             return Ok(subjects);
         }
-        
-        
+
+
         //POST
 
         [HttpPost("class/teacher")]
@@ -141,7 +141,7 @@ namespace SchoolAPI.Controllers
                 return BadRequest(ModelState);
             }
             var id = _schoolService.CreateClassAndTeacherToIt(group);
-            return Created($"/api/school/classes/{id}",null);
+            return Created($"/api/school/classes/{id}", null);
         }
 
         [HttpPost("teacher/subjects")]
@@ -159,7 +159,7 @@ namespace SchoolAPI.Controllers
         [HttpPost("student/class")]
         public ActionResult CreateStudentAndAssignClassToHim([FromBody] CreateStudentAndAssignClassDto student)
         {
-            if (!ModelState.IsValid )
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -169,12 +169,40 @@ namespace SchoolAPI.Controllers
             if (!classesId.Contains(student.ClassId))
             {
                 return BadRequest("Given ClassId doesn't exist");
-            }
-
+            }            
             var id = _schoolService.CreateStudentAndAssignClassToHim(student);
             return Created($"/api/school/student/{id}", null);
         }
 
 
+        //DELETE
+
+        [HttpDelete("remove/student/{studentId}")]
+        public ActionResult RemoveStudent([FromRoute] int studentId)
+        {
+            var isRemoved = _schoolService.RemoveStudent(studentId);
+            if (isRemoved) return NoContent();
+            return NotFound();
+        }
+
+        [HttpDelete("remove/teacher/{teacherId}")]
+        public ActionResult RemoveTeacherThatIsNotATutor([FromRoute] int teacherId)
+        {
+            var isRemoved = _schoolService.RemoveTeacherThatIsNotATutor(teacherId);
+            if (isRemoved) return NoContent();
+            return NotFound();
+        }
+
+
+        //PUT
+
+        [HttpPut("update/teacher/{teacherId}")]
+        public ActionResult UpdateTeacher([FromBody] UpdateTeacherDto dto, [FromRoute] int teacherId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var isUpdated = _schoolService.UpdateTeacher(dto,teacherId);
+            if (isUpdated) return Ok();
+            return NotFound();
+        }
     }
 }

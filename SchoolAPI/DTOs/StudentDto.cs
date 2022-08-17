@@ -11,5 +11,6 @@ namespace SchoolAPI.DTOs
         public string StudentName { get; set; }
         public string StudentSecondName { get; set; }
         public int StudentAge { get; set; }
+        public int ClassId { get; set; }
     }
 }
