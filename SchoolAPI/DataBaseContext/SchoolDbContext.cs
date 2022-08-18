@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using SchoolAPI.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,9 @@ namespace SchoolAPI.DataBaseContext
 {
     public class SchoolDbContext: DbContext
     {
-        private readonly string _connectionString=
-            @"Server=SQLOLEDB.1;Integrated Security = SSPI; Persist Security Info=False;Initial Catalog = SchoolDb; Data Source = localhost;";
+        private readonly string _connectionString = 
+       
+        @"Server=SQLOLEDB.1;Integrated Security = SSPI; Persist Security Info=False;Initial Catalog = SchoolDb; Data Source = localhost;";
 
         public DbSet<Class> Classes { get; set; }
         public DbSet<Student> Students { get; set; }
