@@ -17,15 +17,14 @@ namespace SchoolAPI.Interfaces
         TeacherDto GetTeacherById(int teacherId);
         IEnumerable<TeacherDto> GetTeachersBySubject(string subject);
         IEnumerable<SubjectDto> GetAllSubjects();
-        IEnumerable<int> GetAllClassesId();
 
         int CreateClassAndTeacherToIt(CreateClassAndTeacherDto group);
         int CreateTeacherAndSubjectsToHim(CreateTeacherAndSubjectDto teacher);
         int CreateStudentAndAssignClassToHim(CreateStudentAndAssignClassDto student);
         
-        bool RemoveStudent(int studentId);
-        bool RemoveTeacherThatIsNotATutor(int teacherId);
+        void RemoveStudent(int studentId);
+        void RemoveTeacherThatIsNotATutor(int teacherId);
 
-        bool UpdateTeacher(UpdateTeacherDto dto,int teacherId);
+        void UpdateTeacher(UpdateTeacherDto dto,int teacherId);
     }
 }

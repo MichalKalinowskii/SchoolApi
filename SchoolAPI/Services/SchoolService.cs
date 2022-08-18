@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SchoolAPI.DataBaseContext;
 using SchoolAPI.DTOs;
 using SchoolAPI.Entities;
+using SchoolAPI.Exceptions;
 using SchoolAPI.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace SchoolAPI.Services
                 .Include(r => r.Teacher)
                 .ThenInclude(r => r.Subject)
                 .ToList();
-
+            if (!classes.Any()) throw new NotFoundException("Classes doesn't found");
             var classesDto = _mapper.Map<List<ClassDto>>(classes);
             return classesDto;
         }
@@ -49,6 +50,7 @@ namespace SchoolAPI.Services
             .ThenInclude(r => r.Subject)
             .Where(r => r.ClassId == classId)
             .FirstOrDefault();
+            if (classes is null) throw new NotFoundException("Class don't found");           
             var classesDto = _mapper.Map<ClassDto>(classes);
             return classesDto;
         }
@@ -56,6 +58,7 @@ namespace SchoolAPI.Services
         public IEnumerable<StudentDto> GetAllStudents()
         {
             var students = _dbcontext.Students.ToList();
+            if (!students.Any()) throw new NotFoundException("Students doesn't found");
             var studentsDto = _mapper.Map<List<StudentDto>>(students);
             return studentsDto;
         }
@@ -63,6 +66,7 @@ namespace SchoolAPI.Services
         public StudentDto GetStudentById(int studentId)
         {
             var student = _dbcontext.Students.Where(r => r.StudentId == studentId).FirstOrDefault();
+            if (student is null) throw new NotFoundException("Student don't found");
             var studentDto = _mapper.Map<StudentDto>(student);
             return studentDto;
         }
@@ -70,6 +74,7 @@ namespace SchoolAPI.Services
         public IEnumerable<StudentDto> GetStudentsByAge(int age)
         {
             var students = _dbcontext.Students.Where(r => r.StudentAge == age).ToList();
+            if (!students.Any()) throw new NotFoundException("Students doesn't found");
             var studentsDto = _mapper.Map<List<StudentDto>>(students);
             return studentsDto;
         }
@@ -79,7 +84,7 @@ namespace SchoolAPI.Services
             var teachers = _dbcontext.Teachers
                 .Include(subject => subject.Subject)
                 .ToList();
-
+            if (!teachers.Any()) throw new NotFoundException("Teachers doesn't found");
             var teachersDto = _mapper.Map<List<TeacherDto>>(teachers);
             return teachersDto;
         }
@@ -91,7 +96,7 @@ namespace SchoolAPI.Services
             .Where(r => r.TeacherId == teacherId)
             .Include(subject => subject.Subject)
             .FirstOrDefault();
-
+            if (teacher is null) throw new NotFoundException("Teacher don't found");
             var teacherDto = _mapper.Map<TeacherDto>(teacher);
             return teacherDto;
 
@@ -107,7 +112,7 @@ namespace SchoolAPI.Services
                     (post, meta) => new { Post = post, Meta = meta, })
                 .Where(r => r.Meta.NameOfTheSubject.Equals(subject))
                 .ToList();
-
+            if (!teachersBySubject.Any()) throw new NotFoundException("Teachers doesn't found");
             List<Teacher> teachers = new();
             foreach (var item in teachersBySubject)
             {
@@ -124,17 +129,11 @@ namespace SchoolAPI.Services
                 .ToList()
                 .GroupBy(g => g.NameOfTheSubject)
                 .Select(s => s.First());
-
+            if (!subjects.Any()) throw new NotFoundException("Subjects doesn't found");
             var subjectsDto = _mapper.Map<List<SubjectDto>>(subjects);
             return subjectsDto;
         }
-        public IEnumerable<int> GetAllClassesId()
-        {
-            var classesId = _dbcontext.Classes
-                .Select(s => s.ClassId)
-                .ToList();
-            return classesId;
-        }
+        
 
 
         // POST
@@ -145,7 +144,7 @@ namespace SchoolAPI.Services
             var classes = _mapper.Map<Class>(group);
             _dbcontext.Classes.Add(classes);
             _dbcontext.SaveChanges();
-            _logger.LogWarning($"Class with {classes.ClassId} was created");
+            _logger.LogWarning($"Class with ClassId = {classes.ClassId}, was created");
             return classes.ClassId;
         }
 
@@ -155,61 +154,70 @@ namespace SchoolAPI.Services
             var teachers = _mapper.Map<Teacher>(teacher);
             _dbcontext.Teachers.Add(teachers);
             _dbcontext.SaveChanges();
-            _logger.LogWarning($"Teacher with {teachers.TeacherId} was created");
+            _logger.LogWarning($"Teacher with TeacherId = {teachers.TeacherId}, was created");
             return teachers.TeacherId;
         }
 
         public int CreateStudentAndAssignClassToHim(CreateStudentAndAssignClassDto student)
         {
             _logger.LogWarning($"Create student and assign class to him, POST action was invoked");
+            var classesId = GetAllClassesId();
+            if (!classesId.Contains(student.ClassId))
+            {
+                _logger.LogWarning($"Class with ClassId =  {student.ClassId}, was not found");
+                throw new NotFoundException("Class don't found");
+            }                       
             var students = _mapper.Map<Student>(student);
             _dbcontext.Students.Add(students);
             _dbcontext.SaveChanges();
-            _logger.LogWarning($"Student with {students.StudentId} was created");
+            _logger.LogWarning($"Student with StudentId = {students.StudentId}, was created");
             return students.StudentId;
         }
+        private IEnumerable<int> GetAllClassesId()
+        {
+            var classesId = _dbcontext.Classes
+                .Select(s => s.ClassId)
+                .ToList();
+            return classesId;
+        }
 
-        
 
         // DELETE
 
-        public bool RemoveStudent(int studentId)
+        public void RemoveStudent(int studentId)
         {
-            _logger.LogWarning($"Student with {studentId} DELETE action was invoked");
+            _logger.LogWarning($"Student with StudentId = {studentId}, DELETE action was invoked");
 
             var student = _dbcontext.Students.Where(r => r.StudentId == studentId).FirstOrDefault();
             if (student is null)
             {
-                _logger.LogWarning($"Student with {studentId} DELETE action have failed");
-                return false;       
+                _logger.LogWarning($"Student with StudentId = {studentId}, DELETE action have failed");
+                throw new NotFoundException("Student not found");       
             }
                 _dbcontext.Students.Remove(student);
             _dbcontext.SaveChanges();
-            _logger.LogWarning($"Student with {studentId} DELETE action have succeed");
-            return true;
+            _logger.LogWarning($"Student with StudentId = {studentId}, DELETE action have succeed");
         }
 
-        public bool RemoveTeacherThatIsNotATutor(int teacherId)
+        public void RemoveTeacherThatIsNotATutor(int teacherId)
         {
-            _logger.LogWarning($"Teacher with {teacherId} DELETE action was invoked");       
+            _logger.LogWarning($"Teacher with TeacherId = {teacherId}, DELETE action was invoked");       
             var teacher = GetTeacher(teacherId);
 
             var teachersInClasses = GetListofTeacherIdInClasses();
 
             if (teacher is null || teachersInClasses.Contains(teacherId))
             {
-                _logger.LogWarning($"Teacher with {teacherId} DELETE action have failed");
-                return false;
+                _logger.LogWarning($"Teacher with TeacherId = {teacherId}, DELETE action have failed");
+                throw new NotFoundException("Teacher not found");
             }
             _dbcontext.Teachers.Remove(teacher);
 
             _dbcontext.SaveChanges();
 
-            _logger.LogWarning($"Teacher with {teacherId} DELETE action have succeed");
+            _logger.LogWarning($"Teacher with TeacherId = {teacherId}, DELETE action have succeed");
 
             RemoveSubjectsRunByTeacher(teacherId);
-            
-            return true;
         }
 
         private Teacher GetTeacher(int teacherId)
@@ -241,23 +249,22 @@ namespace SchoolAPI.Services
 
         //PUT
 
-        public bool UpdateTeacher(UpdateTeacherDto dto,int teacherId)
+        public void UpdateTeacher(UpdateTeacherDto dto,int teacherId)
         {
-            _logger.LogWarning($"Teacher with {teacherId} PUT action was invoked");
+            _logger.LogWarning($"Teacher with TeacherId = {teacherId}, PUT action was invoked");
             var teacher = _dbcontext.Teachers
                 .Where(r => r.TeacherId == teacherId)
                 .FirstOrDefault();
             if (teacher is null)
             {
-                _logger.LogWarning($"Teacher with {teacherId} PUT action have failed");
-                return false;
+                _logger.LogWarning($"Teacher with TeacherId = {teacherId}, PUT action have failed");
+                throw new NotFoundException("Teacher not found");
             }
             teacher.TeacherName = dto.TeacherName;
             teacher.TeacherSecondName = dto.TeacherSecondName;
             teacher.TeacherTitle = dto.TeacherTitle;
             _dbcontext.SaveChanges();
-            _logger.LogWarning($"Teacher with {teacherId} PUT action have succeed");
-            return true;
+            _logger.LogWarning($"Teacher with TeacherId = {teacherId}, PUT action have succeed");
         }
 
     }

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace SchoolAPI.Controllers
 {
     [Route("api/school")]
+    [ApiController]
     public class SchoolController : ControllerBase
     {
         private readonly ISchoolService _schoolService;
@@ -28,106 +29,64 @@ namespace SchoolAPI.Controllers
         [HttpGet("classes")]
         public ActionResult<IEnumerable<ClassDto>> GetAllClasses()
         {
-            var classes = _schoolService.GetAllClasses();
-
-            if (!classes.Any())
-            {
-                return NotFound();
-            }
-
-            return Ok(classes);
+            var classesDto = _schoolService.GetAllClasses();
+            return Ok(classesDto);
         }
 
         [HttpGet("classes/{classId}")]
         public ActionResult<ClassDto> GetClassById([FromRoute] int classId)
         {
-            var classes = _schoolService.GetClassById(classId);
-
-            if (classes is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(classes);
+            var classesDto = _schoolService.GetClassById(classId);
+            return Ok(classesDto);
         }
 
         [HttpGet("students")]
         public ActionResult<IEnumerable<StudentDto>> GetAllStudents()
         {
-            var students = _schoolService.GetAllStudents();
-            if (!students.Any())
-            {
-                return NotFound();
-            }
-            return Ok(students);
+            var studentsDto = _schoolService.GetAllStudents();            
+            return Ok(studentsDto);
         }
 
         [HttpGet("student/{studentId}")]
         public ActionResult<StudentDto> GetStudentById([FromRoute] int studentId)
         {
-            var student = _schoolService.GetStudentById(studentId);
-            if (student is null)
-            {
-                return NotFound();
-            }
-            return Ok(student);
+            var studentDto = _schoolService.GetStudentById(studentId);            
+            return Ok(studentDto);
         }
 
         [HttpGet("students/{age}")]
         public ActionResult<IEnumerable<StudentDto>> GetStudentsByAge([FromRoute] int age)
         {
-            var students = _schoolService.GetStudentsByAge(age);
-            if (!students.Any())
-            {
-                return NotFound();
-            }
-            return Ok(students);
+            var studentsDto = _schoolService.GetStudentsByAge(age);     
+            return Ok(studentsDto);
         }
 
         [HttpGet("teachers")]
         public ActionResult<IEnumerable<TeacherDto>> GetAllTeachers()
         {
-            var teachers = _schoolService.GetAllTeachers();
-            if (!teachers.Any())
-            {
-                return NotFound();
-            }
-            return Ok(teachers);
+            var teachersDto = _schoolService.GetAllTeachers();
+            return Ok(teachersDto);
         }
 
         [HttpGet("teacher/{teacherId}")]
         public ActionResult<TeacherDto> GetTeacherById([FromRoute] int teacherId)
         {
-            var teacher = _schoolService.GetTeacherById(teacherId);
-            if (teacher is null)
-            {
-                return NotFound();
-            }
-            return Ok(teacher);
+            var teacherDto = _schoolService.GetTeacherById(teacherId);            
+            return Ok(teacherDto);
         }
 
         [HttpGet("teachers/{subject}")]
         public ActionResult<IEnumerable<TeacherDto>> GetTeachersBySubject([FromRoute] string subject)
         {
-            var teacherBySubject = _schoolService.GetTeachersBySubject(subject);
-            if (!teacherBySubject.Any())
-            {
-                return NotFound();
-            }
-            return Ok(teacherBySubject);
+            var teacherDto = _schoolService.GetTeachersBySubject(subject);           
+            return Ok(teacherDto);
         }
 
         [HttpGet("subjects")]
         public ActionResult<IEnumerable<SubjectDto>> GetAllSubjects()
         {
-            var subjects = _schoolService.GetAllSubjects();
-
-            if (!subjects.Any())
-            {
-                return NotFound();
-            }
-
-            return Ok(subjects);
+            var subjectsDto = _schoolService.GetAllSubjects();
+            return Ok(subjectsDto);
         }
 
 
@@ -136,10 +95,6 @@ namespace SchoolAPI.Controllers
         [HttpPost("class/teacher")]
         public ActionResult CreateClassAndTeacherToIt([FromBody] CreateClassAndTeacherDto group)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
             var id = _schoolService.CreateClassAndTeacherToIt(group);
             return Created($"/api/school/classes/{id}", null);
         }
@@ -147,29 +102,13 @@ namespace SchoolAPI.Controllers
         [HttpPost("teacher/subjects")]
         public ActionResult CreateTeacherAndSubjectsToHim([FromBody] CreateTeacherAndSubjectDto teacher)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _schoolService.CreateTeacherAndSubjectsToHim(teacher);
             return Created($"/api/school/teacher/{id}", null);
         }
 
         [HttpPost("student/class")]
         public ActionResult CreateStudentAndAssignClassToHim([FromBody] CreateStudentAndAssignClassDto student)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var classesId = _schoolService.GetAllClassesId();
-
-            if (!classesId.Contains(student.ClassId))
-            {
-                return BadRequest("Given ClassId doesn't exist");
-            }            
+        {                       
             var id = _schoolService.CreateStudentAndAssignClassToHim(student);
             return Created($"/api/school/student/{id}", null);
         }
@@ -180,17 +119,15 @@ namespace SchoolAPI.Controllers
         [HttpDelete("remove/student/{studentId}")]
         public ActionResult RemoveStudent([FromRoute] int studentId)
         {
-            var isRemoved = _schoolService.RemoveStudent(studentId);
-            if (isRemoved) return NoContent();
-            return NotFound();
+            _schoolService.RemoveStudent(studentId);
+            return NoContent();
         }
 
         [HttpDelete("remove/teacher/{teacherId}")]
         public ActionResult RemoveTeacherThatIsNotATutor([FromRoute] int teacherId)
         {
-            var isRemoved = _schoolService.RemoveTeacherThatIsNotATutor(teacherId);
-            if (isRemoved) return NoContent();
-            return NotFound();
+            _schoolService.RemoveTeacherThatIsNotATutor(teacherId);
+            return NoContent();
         }
 
 
@@ -199,10 +136,8 @@ namespace SchoolAPI.Controllers
         [HttpPut("update/teacher/{teacherId}")]
         public ActionResult UpdateTeacher([FromBody] UpdateTeacherDto dto, [FromRoute] int teacherId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var isUpdated = _schoolService.UpdateTeacher(dto,teacherId);
-            if (isUpdated) return Ok();
-            return NotFound();
+            _schoolService.UpdateTeacher(dto,teacherId);
+             return Ok();
         }
     }
 }
