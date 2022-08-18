@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using SchoolAPI.DataBaseContext;
 using SchoolAPI.DataSeed;
 using SchoolAPI.Interfaces;
+using SchoolAPI.Middleware;
 using SchoolAPI.Services;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace SchoolAPI
             services.AddScoped<ISchoolSeeder,SchoolSeeder>();
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<ISchoolService,SchoolService>();
+            services.AddScoped<ErrorHandlingMiddleware>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -52,12 +54,10 @@ namespace SchoolAPI
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SchoolAPI v1"));
             }
-
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

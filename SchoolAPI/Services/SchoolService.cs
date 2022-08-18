@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SchoolAPI.DataBaseContext;
 using SchoolAPI.DTOs;
 using SchoolAPI.Entities;
@@ -15,11 +16,13 @@ namespace SchoolAPI.Services
     {
         private readonly SchoolDbContext _dbcontext;
         private readonly IMapper _mapper;
+        private readonly ILogger<SchoolService> _logger;
 
-        public SchoolService(SchoolDbContext dbcontext, IMapper mapper)
+        public SchoolService(SchoolDbContext dbcontext, IMapper mapper, ILogger<SchoolService> logger)
         {
             _dbcontext = dbcontext;
             _mapper = mapper;
+            _logger = logger;
         }
 
 
@@ -138,25 +141,31 @@ namespace SchoolAPI.Services
 
         public int CreateClassAndTeacherToIt(CreateClassAndTeacherDto group)
         {
+            _logger.LogWarning($"Create class and teacher to it, POST action was invoked");
             var classes = _mapper.Map<Class>(group);
             _dbcontext.Classes.Add(classes);
             _dbcontext.SaveChanges();
+            _logger.LogWarning($"Class with {classes.ClassId} was created");
             return classes.ClassId;
         }
 
         public int CreateTeacherAndSubjectsToHim(CreateTeacherAndSubjectDto teacher)
         {
+            _logger.LogWarning($"Create teacher and subjects to him, POST action was invoked");
             var teachers = _mapper.Map<Teacher>(teacher);
             _dbcontext.Teachers.Add(teachers);
             _dbcontext.SaveChanges();
+            _logger.LogWarning($"Teacher with {teachers.TeacherId} was created");
             return teachers.TeacherId;
         }
 
         public int CreateStudentAndAssignClassToHim(CreateStudentAndAssignClassDto student)
         {
+            _logger.LogWarning($"Create student and assign class to him, POST action was invoked");
             var students = _mapper.Map<Student>(student);
             _dbcontext.Students.Add(students);
             _dbcontext.SaveChanges();
+            _logger.LogWarning($"Student with {students.StudentId} was created");
             return students.StudentId;
         }
 
@@ -166,50 +175,88 @@ namespace SchoolAPI.Services
 
         public bool RemoveStudent(int studentId)
         {
+            _logger.LogWarning($"Student with {studentId} DELETE action was invoked");
+
             var student = _dbcontext.Students.Where(r => r.StudentId == studentId).FirstOrDefault();
-            if (student is null) return false;
-            _dbcontext.Students.Remove(student);
+            if (student is null)
+            {
+                _logger.LogWarning($"Student with {studentId} DELETE action have failed");
+                return false;       
+            }
+                _dbcontext.Students.Remove(student);
             _dbcontext.SaveChanges();
+            _logger.LogWarning($"Student with {studentId} DELETE action have succeed");
             return true;
         }
 
         public bool RemoveTeacherThatIsNotATutor(int teacherId)
         {
-            var teacher = _dbcontext.Teachers
-                .Where(r => r.TeacherId == teacherId)
-                .FirstOrDefault();
+            _logger.LogWarning($"Teacher with {teacherId} DELETE action was invoked");       
+            var teacher = GetTeacher(teacherId);
 
-            var teachersInClasses = _dbcontext.Classes
-                .Select(s => s.TeacherId)
-                .ToList();
+            var teachersInClasses = GetListofTeacherIdInClasses();
 
-            if (teacher is null || teachersInClasses.Contains(teacherId)) return false;
-
+            if (teacher is null || teachersInClasses.Contains(teacherId))
+            {
+                _logger.LogWarning($"Teacher with {teacherId} DELETE action have failed");
+                return false;
+            }
             _dbcontext.Teachers.Remove(teacher);
 
-            var subject = _dbcontext.Subjects
-                .Where(r => r.TeacherId == teacherId)
-                .ToList();            
-            _dbcontext.Subjects.RemoveRange(subject);
-
             _dbcontext.SaveChanges();
+
+            _logger.LogWarning($"Teacher with {teacherId} DELETE action have succeed");
+
+            RemoveSubjectsRunByTeacher(teacherId);
+            
             return true;
         }
 
+        private Teacher GetTeacher(int teacherId)
+        {
+            var teacher = _dbcontext.Teachers
+                .Where(r => r.TeacherId == teacherId)
+                .FirstOrDefault();
+            return teacher;
+        }
+
+        private IEnumerable<int> GetListofTeacherIdInClasses()
+        {
+            var list =_dbcontext.Classes
+                .Select(s => s.TeacherId)
+                .ToList();
+            return list;
+    }
+
+        private void RemoveSubjectsRunByTeacher(int teacherId)
+        {
+            var subject = _dbcontext.Subjects
+                .Where(r => r.TeacherId == teacherId)
+                .ToList();
+
+            _dbcontext.Subjects.RemoveRange(subject);
+
+            _dbcontext.SaveChanges();
+        }
 
         //PUT
 
         public bool UpdateTeacher(UpdateTeacherDto dto,int teacherId)
         {
+            _logger.LogWarning($"Teacher with {teacherId} PUT action was invoked");
             var teacher = _dbcontext.Teachers
                 .Where(r => r.TeacherId == teacherId)
                 .FirstOrDefault();
-            if (teacher is null) return false;
-
+            if (teacher is null)
+            {
+                _logger.LogWarning($"Teacher with {teacherId} PUT action have failed");
+                return false;
+            }
             teacher.TeacherName = dto.TeacherName;
             teacher.TeacherSecondName = dto.TeacherSecondName;
             teacher.TeacherTitle = dto.TeacherTitle;
             _dbcontext.SaveChanges();
+            _logger.LogWarning($"Teacher with {teacherId} PUT action have succeed");
             return true;
         }
 
