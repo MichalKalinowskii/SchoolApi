@@ -1,4 +1,4 @@
-﻿using SchoolAPI.DataBaseContext;
+﻿using SchoolAPI.DatabaseContext;
 using SchoolAPI.Entities;
 using SchoolAPI.Interfaces;
 using System;

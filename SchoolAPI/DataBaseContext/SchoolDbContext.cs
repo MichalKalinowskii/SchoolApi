@@ -7,13 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SchoolAPI.DataBaseContext
+namespace SchoolAPI.DatabaseContext
 {
     public class SchoolDbContext: DbContext
     {
-        private readonly string _connectionString = 
-       
-        @"Server=SQLOLEDB.1;Integrated Security = SSPI; Persist Security Info=False;Initial Catalog = SchoolDb; Data Source = localhost;";
+        public SchoolDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Class> Classes { get; set; }
         public DbSet<Student> Students { get; set; }
@@ -36,7 +34,7 @@ namespace SchoolAPI.DataBaseContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(_connectionString);
+            optionsBuilder.UseSqlServer();
         }
 
     }

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SchoolAPI.DataBaseContext;
+using SchoolAPI.DatabaseContext;
 using SchoolAPI.DTOs;
 using SchoolAPI.Entities;
 using SchoolAPI.Interfaces;

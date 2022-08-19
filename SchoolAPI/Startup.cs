@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using SchoolAPI.DataBaseContext;
+using SchoolAPI.DatabaseContext;
 using SchoolAPI.DataSeed;
 using SchoolAPI.Interfaces;
 using SchoolAPI.Middleware;
@@ -31,7 +32,7 @@ namespace SchoolAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<SchoolDbContext>();
+            services.AddDbContext<SchoolDbContext>(opttions=>opttions.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<ISchoolSeeder,SchoolSeeder>();
             services.AddAutoMapper(this.GetType().Assembly);
             services.AddScoped<ISchoolService,SchoolService>();

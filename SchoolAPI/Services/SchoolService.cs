@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SchoolAPI.DataBaseContext;
+using SchoolAPI.DatabaseContext;
 using SchoolAPI.DTOs;
 using SchoolAPI.Entities;
 using SchoolAPI.Exceptions;
