@@ -32,11 +32,16 @@ namespace SchoolAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<SchoolDbContext>(opttions=>opttions.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddScoped<ISchoolSeeder,SchoolSeeder>();
+            services.AddDbContext<SchoolDbContext>(opttions => opttions.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<ISchoolSeeder, SchoolSeeder>();
             services.AddAutoMapper(this.GetType().Assembly);
-            services.AddScoped<ISchoolService,SchoolService>();
+            services.AddScoped<ISchoolService, SchoolService>();
             services.AddScoped<ErrorHandlingMiddleware>();
+
+            services.AddCors(
+                options => options.AddDefaultPolicy(
+                    bulider => bulider.AllowAnyOrigin()     
+            ));
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -61,10 +66,14 @@ namespace SchoolAPI
 
             app.UseRouting();
 
+            app.UseCors();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
         }
+
     }
 }

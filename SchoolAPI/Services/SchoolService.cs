@@ -157,7 +157,11 @@ namespace SchoolAPI.Services
             _logger.LogWarning($"Teacher with TeacherId = {teachers.TeacherId}, was created");
             return teachers.TeacherId;
         }
-
+        /// <summary>
+        /// Create student and assign class to him by ClassId
+        /// </summary>
+        /// <param name="student">Take object of class CreateStudentAndAssignClassDto</param>
+        /// <returns>StudentId of created student</returns>
         public int CreateStudentAndAssignClassToHim(CreateStudentAndAssignClassDto student)
         {
             _logger.LogWarning($"Create student and assign class to him, POST action was invoked");
@@ -173,6 +177,7 @@ namespace SchoolAPI.Services
             _logger.LogWarning($"Student with StudentId = {students.StudentId}, was created");
             return students.StudentId;
         }
+
         private IEnumerable<int> GetAllClassesId()
         {
             var classesId = _dbcontext.Classes

@@ -12,7 +12,7 @@ namespace SchoolAPI.MappingProfile
     {
         public SchoolMappingProfile()
         {                        
-            //For HttpGet
+            //Get
             CreateMap<Class, ClassDto>()
                 .ForMember(dst => dst.Students, map => map.MapFrom(src => src.Student));
 
@@ -23,7 +23,7 @@ namespace SchoolAPI.MappingProfile
 
             CreateMap<Student, StudentDto>();
 
-            //For HttpPost
+            //Post
             CreateMap<CreateClassAndTeacherDto, Class>()
                 .ForMember(dst => dst.Teacher, map => map.MapFrom(src => new Teacher()
                 {
